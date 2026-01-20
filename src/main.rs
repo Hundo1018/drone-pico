@@ -10,13 +10,20 @@ use defmt_rtt as _;
 use embedded_hal::digital::OutputPin;
 use panic_probe as _;
 
+use rp_pico::hal::gpio::bank0::Gpio25;
+use rp_pico::hal::gpio::bank0::Gpio4;
+use rp_pico::hal::gpio::bank0::Gpio5;
+use rp_pico::hal::gpio::FunctionI2c;
+use rp_pico::hal::gpio::Pin;
+use rp_pico::hal::gpio::PullDown;
+use rp_pico::hal::gpio::SioOutput;
 // Provide an alias for our BSP so we can switch targets quickly.
 // Uncomment the BSP you included in Cargo.toml, the rest of the code does not need to change.
 use rp_pico as bsp;
 // use sparkfun_pro_micro_rp2040 as bsp;
 
 use bsp::hal::{
-    clocks::{Clock, init_clocks_and_plls},
+    clocks::{init_clocks_and_plls, Clock},
     pac,
     sio::Sio,
     watchdog::Watchdog,
@@ -63,15 +70,37 @@ fn main() -> ! {
     // LED to one of the GPIO pins, and reference that pin here. Don't forget adding an appropriate resistor
     // in series with the LED.
     let mut led_pin = pins.led.into_push_pull_output();
-
+    //sda
+    let sda_pin = pins.gpio4.into_function::<bsp::hal::gpio::FunctionI2C>();
+    //scl
+    let scl_pin = pins.gpio5.into_function::<bsp::hal::gpio::FunctionI2C>();
+    mpu6050(sda_pin, scl_pin);
+    let limit: u32 = 255;
+    let mut i: u32 = limit;
     loop {
         info!("on!");
         led_pin.set_high().unwrap();
-        delay.delay_ms(500);
+        delay.delay_ms(i);
         info!("off!");
         led_pin.set_low().unwrap();
-        delay.delay_ms(500);
+        delay.delay_ms(i);
+        i = i - 1;
+        if i <= 0 {
+            i = limit;
+        }
     }
 }
+
+fn set_led(mut led: Pin<Gpio25, rp_pico::hal::gpio::FunctionSio<SioOutput>, PullDown>, b: bool) {
+    if b {
+        led.set_high();
+        info!("led on");
+    } else {
+        led.set_low();
+        info!("led off");
+    }
+}
+
+fn mpu6050(sda: Pin<Gpio4, FunctionI2c, PullDown>, scl: Pin<Gpio5, FunctionI2c, PullDown>) {}
 
 // End of file
