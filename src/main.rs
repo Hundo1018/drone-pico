@@ -71,36 +71,19 @@ fn main() -> ! {
     // in series with the LED.
     let mut led_pin = pins.led.into_push_pull_output();
     //sda
-    let sda_pin = pins.gpio4.into_function::<bsp::hal::gpio::FunctionI2C>();
+    // let sda_pin = pins.gpio4.into_function::<bsp::hal::gpio::FunctionI2C>();
     //scl
-    let scl_pin = pins.gpio5.into_function::<bsp::hal::gpio::FunctionI2C>();
-    mpu6050(sda_pin, scl_pin);
+    // let scl_pin = pins.gpio5.into_function::<bsp::hal::gpio::FunctionI2C>();
     let limit: u32 = 255;
-    let mut i: u32 = limit;
+    // let mut i: u32 = limit;
     loop {
         info!("on!");
         led_pin.set_high().unwrap();
-        delay.delay_ms(i);
+        delay.delay_ms(500);
         info!("off!");
         led_pin.set_low().unwrap();
-        delay.delay_ms(i);
-        i = i - 1;
-        if i <= 0 {
-            i = limit;
-        }
+        delay.delay_ms(500);
     }
 }
-
-fn set_led(mut led: Pin<Gpio25, rp_pico::hal::gpio::FunctionSio<SioOutput>, PullDown>, b: bool) {
-    if b {
-        led.set_high();
-        info!("led on");
-    } else {
-        led.set_low();
-        info!("led off");
-    }
-}
-
-fn mpu6050(sda: Pin<Gpio4, FunctionI2c, PullDown>, scl: Pin<Gpio5, FunctionI2c, PullDown>) {}
 
 // End of file
